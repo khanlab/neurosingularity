@@ -1,0 +1,33 @@
+#!/bin/bash
+
+if [ "$#" -lt 1 ]
+then
+ echo "Usage: $0 <bids apps> ..."
+ echo " e.g.: poldracklab/fmriprep:0.5.2"
+ exit 0
+fi
+
+source $config
+
+for app in $@
+do
+
+ group=${app%%/*}
+ name=${app#*/}
+ name=${name%%:*}
+ tag=${app##*:}
+
+ echo $group / $name : $tag
+
+ tmpdir=/tmp/singularity$RANDOM
+
+ ./docker2singularity $app $tmpdir
+
+ out_img=`ls -tr $tmpdir/${group}_${name}_${tag}*.img | tail -n 1`
+
+ 
+ #copy to sharcnet
+ rsync --info=progress2 $out_img $remote_user@$remote_host:$remote_singularity_dir/${group}_${name}_${tag}.img
+
+
+done

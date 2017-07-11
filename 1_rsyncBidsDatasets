@@ -1,0 +1,20 @@
+#!/bin/bash
+
+
+if [ "$#" -lt 1 ]
+then 
+ echo "Usage: $0 <project names..>"
+ echo ""
+ echo "e.g.:"
+ echo  "  " `ls $local_bids_root`
+ echo ""
+ exit 0
+fi
+
+
+for project in $@
+do
+
+rsync -av $local_bids_root/$project $remote_user@$remote_host:$remote_bids_root
+
+done 
