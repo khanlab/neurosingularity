@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if [ ! -n "$remote_singularity_dir" ]
+then
+ echo "Config file not run, exiting..."
+ exit 0
+fi
 
 if [ "$#" -lt 4 ]
 then
@@ -14,7 +19,7 @@ fi
 echo "Usage: $0 <app_img> <bids_dir> <output_dir> <participant/group>  <app options>"
 echo ""
 echo " List of apps: "
-ls $remote_singularity_dir
+ls $remote_singularity_dir/*.img
 echo ""
 echo " Run with app name to get usage for particular app."
 echo ""
@@ -22,14 +27,14 @@ exit 0
 fi
 
 app_img=$1
-bids_dir=$2
-out_dir=$3
+bids_dir=`realpath $2`
+out_dir=`realpath $3`
 level=$4
 
 singularity_image=$remote_singularity_dir/${app_img}
 image_name=${singularity_image##*/}
 image_name=${image_name%.*}
-
+default_opts=`${singularity_image}.opts`
 
 shift 4
 options=$@
@@ -44,8 +49,6 @@ then
 fi
 
 
-out_submit_dir=jobs_${image_name}_`date +%Y_%m_%d_%-I%p`
-mkdir -p $out_submit_dir
 
 if [ "$level" = "participant" ]
 then
@@ -57,23 +60,28 @@ do
  subj=${subjline%%\	}
  echo $subj
 
+out_submit_dir=jobs_${image_name}_`date +%Y_%m_%d_%-I%p`/$subj
+mkdir -p $out_submit_dir
 
- job=$out_submit_dir/$subj.sh
+ job=$out_submit_dir/run.sh
  echo "#!/bin/bash" > $job
- echo "singularity run -e -B /project:/project $singularity_image --participant_label=$subj $options $bids_dir $out_dir $level" >> $job
+ echo "singularity run -e -B /project:/project $singularity_image --participant_label=$subj $default_opts $options $bids_dir $out_dir $level" >> $job
  
-  sbatch -J $subj.$image_name -D $out_submit_dir $slurmopts --output="$subj.slurm-%j.out" $job
+  sbatch -J $subj.$image_name -D $out_submit_dir $slurmopts --output="slurm-%j.out" $job
 done
 
 else if [ "$level" = "group" ]
 then
+
+out_submit_dir=jobs_${image_name}_`date +%Y_%m_%d_%-I%p`/group
+mkdir -p $out_submit_dir
 
  #group level:
  job=$out_submit_dir/group.sh
  echo "#!/bin/bash" > $job
  echo "singularity run -e -B /project:/project $singularity_image $options $bids_dir $out_dir $level" >> $job
  
- sbatch -J group.$image_name -D $out_submit_dir $slurmopts --output="group.slurm-%j.out" $job
+ sbatch -J group.$image_name -D $out_submit_dir $slurmopts --output="slurm-%j.out" $job
 
 
 fi
