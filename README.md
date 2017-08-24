@@ -21,6 +21,8 @@ Set-up the configuration init file (e.g. config_graham-sharcnet.sh) with particu
 
 Run deployAppContainers to pull docker image, build, and scp to remote cluster
 
+can add a `*.img.opts file to the singularity folder to set default arguments
+
 ## Step 3: 
 
 Run bids_submitJobs to run the BIDS-app pipeline on your BIDS dataset
@@ -28,3 +30,4 @@ Run bids_submitJobs to run the BIDS-app pipeline on your BIDS dataset
 (Note: currently the optional arguments to the BIDS-app are placed after the 3 required arguments, not before -- this could be fixed in a future version to be more consistent with the BIDS-app standard)
 
 
+./bids_submitJobs poldracklab_fmriprep_0.5.2.img /home/akhanf/project/datasets-bids/tle3T_phase2 /home/akhanf/project/datasets-bids/tle3T_phase2/derivatives/fmripep_0.5.2 participant 
