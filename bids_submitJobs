@@ -19,7 +19,9 @@ fi
 echo "Usage: $0 <app_img> <bids_dir> <output_dir> <participant/group>  <app options>"
 echo ""
 echo " List of apps: "
-ls $remote_singularity_dir/*.img
+pushd $remote_singularity_dir > /dev/null
+ls *.img
+popd > /dev/null
 echo ""
 echo " Run with app name to get usage for particular app."
 echo ""
