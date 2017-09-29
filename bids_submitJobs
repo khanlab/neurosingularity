@@ -55,11 +55,9 @@ fi
 if [ "$level" = "participant" ]
 then
 	 
-for subjline in `grep "sub-" $list`
-
+for subj in `tail -n +2 $list | awk '{print $1}' `
 do
 
- subj=${subjline%%\	}
  echo $subj
 
 out_submit_dir=jobs_${image_name}_`date +%Y_%m_%d_%-I%p`/$subj
@@ -83,7 +81,7 @@ mkdir -p $out_submit_dir
  echo "#!/bin/bash" > $job
  echo "singularity run -e -B /project:/project $singularity_image $options $bids_dir $out_dir $level" >> $job
  
- sbatch -J group.$image_name -D $out_submit_dir $slurmopts --output="slurm-%j.out" $job
+  sbatch -J group.$image_name -D $out_submit_dir $slurmopts --output="slurm-%j.out" $job
 
 
 fi
